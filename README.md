@@ -321,3 +321,6 @@ Este projeto está licenciado sob a MIT License. Veja o arquivo [LICENSE](LICENS
 
 ## Contato
 Abra uma issue para dúvidas.
+
+## Autor
+Desenvolvido por Ryann Breston.
