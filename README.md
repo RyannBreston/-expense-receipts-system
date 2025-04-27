@@ -16,6 +16,7 @@ Este projeto cria um sistema para upload de recibos em PDF usando **Google Forms
 - `moveReceipts.js`: Script básico para mover PDFs para pastas.
 - `moveReceiptsWithRename.js`: Versão alternativa com renomeação de PDFs e subpastas por ano-mês.
 - `createFolders.js`: Script opcional para criar pastas no Drive.
+- `LICENSE`: Arquivo de licença MIT.
 - `README.md`: Este arquivo com instruções.
 
 ## Pré-requisitos
@@ -98,7 +99,7 @@ Este projeto cria um sistema para upload de recibos em PDF usando **Google Forms
      ```
 
    **Alternativa Rápida**:
-   - Use o script em `createFolders.js` para criar as pastas e obter os IDs:
+   - Use o script em `createFolders.js`:
      ```javascript
      function createFolders() {
        const mainFolder = DriveApp.createFolder('Recibos de Despesas');
@@ -148,9 +149,127 @@ Este projeto cria um sistema para upload de recibos em PDF usando **Google Forms
 ### 4. Configurar o Google Apps Script
 1. Na planilha, clique em **Extensões** > **Apps Script**.
 2. Escolha uma das opções:
-   - **Básica**: Use o script de `moveReceipts.js` (mover PDFs para pastas).
-   - **Alternativa**: Use o script de `moveReceiptsWithRename.js` (renomear PDFs e usar subpastas por ano-mês).
-3. Apague o código padrão e cole o script escolhido.
+   - **Básica**: Use `moveReceipts.js` (mover PDFs para pastas).
+   - **Alternativa**: Use `moveReceiptsWithRename.js` (renomear PDFs e usar subpastas por ano-mês).
+3. Apague o código padrão e cole o script escolhido:
+   - **moveReceipts.js**:
+     ```javascript
+     function onFormSubmit(e) {
+       const responses = e.namedValues;
+       const conta = responses['Conta de Despesa'][0];
+       const data = responses['Data da Despesa'][0];
+       const descricao = responses['Descrição (Opcional)'][0] || '';
+       const fileUrl = responses['Recibo (PDF)'][0];
+
+       const folderIds = {
+         '344 - Almoço, Café e Lanches': 'INSIRA_ID_DA_PASTA_344',
+         '284 - Comissão Vendedores': 'INSIRA_ID_DA_PASTA_284',
+         '285 - Comissões Operador de Caixa': 'INSIRA_ID_DA_PASTA_285',
+         '199 - Cursos e Treinamentos': 'INSIRA_ID_DA_PASTA_199',
+         '347 - Decoração e Ornamentação Loja': 'INSIRA_ID_DA_PASTA_347',
+         '385 - Despesas Diversas': 'INSIRA_ID_DA_PASTA_385',
+         '203 - Estagiários e Aprendizes': 'INSIRA_ID_DA_PASTA_203',
+         '370 - Exame Médico Admissional/Demissional': 'INSIRA_ID_DA_PASTA_370',
+         '189 - Férias': 'INSIRA_ID_DA_PASTA_189',
+         '158 - Fretes': 'INSIRA_ID_DA_PASTA_158',
+         '110 - Manutenção de Máquinas e Equipamentos': 'INSIRA_ID_DA_PASTA_110',
+         '156 - Manutenção e Reparos Predial': 'INSIRA_ID_DA_PASTA_156',
+         '118 - Materiais de Expediente': 'INSIRA_ID_DA_PASTA_118',
+         '105 - Materiais de Limpeza': 'INSIRA_ID_DA_PASTA_105',
+         '312 - Material de Informática': 'INSIRA_ID_DA_PASTA_312',
+         '351 - Móveis, Utensílios e Bens': 'INSIRA_ID_DA_PASTA_351',
+         '192 - Multa Rescisória': 'INSIRA_ID_DA_PASTA_192',
+         '191 - Rescisões Contratuais': 'INSIRA_ID_DA_PASTA_191',
+         '357 - Sacolas': 'INSIRA_ID_DA_PASTA_357',
+         '324 - Salário Operadores de Caixa': 'INSIRA_ID_DA_PASTA_324',
+         '195 - Vales-Transporte': 'INSIRA_ID_DA_PASTA_195',
+         '129 - Viagens': 'INSIRA_ID_DA_PASTA_129'
+       };
+
+       const folderId = folderIds[conta];
+       if (!folderId) {
+         Logger.log('Conta não encontrada: ' + conta);
+         return;
+       }
+
+       const fileId = fileUrl.match(/[-\w]{25,}/)[0];
+       const file = DriveApp.getFileById(fileId);
+       const folder = DriveApp.getFolderById(folderId);
+
+       file.moveTo(folder);
+
+       const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+       const lastRow = sheet.getLastRow();
+       sheet.getRange(lastRow, sheet.getLastColumn()).setValue(file.getUrl());
+     }
+     ```
+   - **moveReceiptsWithRename.js**:
+     ```javascript
+     function onFormSubmit(e) {
+       const responses = e.namedValues;
+       const conta = responses['Conta de Despesa'][0];
+       const data = responses['Data da Despesa'][0];
+       const descricao = responses['Descrição (Opcional)'][0] || 'SemDescrição';
+       const fileUrl = responses['Recibo (PDF)'][0];
+
+       const folderIds = {
+         '344 - Almoço, Café e Lanches': 'INSIRA_ID_DA_PASTA_344',
+         '284 - Comissão Vendedores': 'INSIRA_ID_DA_PASTA_284',
+         '285 - Comissões Operador de Caixa': 'INSIRA_ID_DA_PASTA_285',
+         '199 - Cursos e Treinamentos': 'INSIRA_ID_DA_PASTA_199',
+         '347 - Decoração e Ornamentação Loja': 'INSIRA_ID_DA_PASTA_347',
+         '385 - Despesas Diversas': 'INSIRA_ID_DA_PASTA_385',
+         '203 - Estagiários e Aprendizes': 'INSIRA_ID_DA_PASTA_203',
+         '370 - Exame Médico Admissional/Demissional': 'INSIRA_ID_DA_PASTA_370',
+         '189 - Férias': 'INSIRA_ID_DA_PASTA_189',
+         '158 - Fretes': 'INSIRA_ID_DA_PASTA_158',
+         '110 - Manutenção de Máquinas e Equipamentos': 'INSIRA_ID_DA_PASTA_110',
+         '156 - Manutenção e Reparos Predial': 'INSIRA_ID_DA_PASTA_156',
+         '118 - Materiais de Expediente': 'INSIRA_ID_DA_PASTA_118',
+         '105 - Materiais de Limpeza': 'INSIRA_ID_DA_PASTA_105',
+         '312 - Material de Informática': 'INSIRA_ID_DA_PASTA_312',
+         '351 - Móveis, Utensílios e Bens': 'INSIRA_ID_DA_PASTA_351',
+         '192 - Multa Rescisória': 'INSIRA_ID_DA_PASTA_192',
+         '191 - Rescisões Contratuais': 'INSIRA_ID_DA_PASTA_191',
+         '357 - Sacolas': 'INSIRA_ID_DA_PASTA_357',
+         '324 - Salário Operadores de Caixa': 'INSIRA_ID_DA_PASTA_324',
+         '195 - Vales-Transporte': 'INSIRA_ID_DA_PASTA_195',
+         '129 - Viagens': 'INSIRA_ID_DA_PASTA_129'
+       };
+
+       const folderId = folderIds[conta];
+       if (!folderId) {
+         Logger.log('Conta não encontrada: ' + conta);
+         return;
+       }
+
+       const date = new Date(data);
+       const year = date.getFullYear();
+       const month = String(date.getMonth() + 1).padStart(2, '0');
+       const yearMonth = `${year}-${month}`;
+
+       const mainFolder = DriveApp.getFolderById(folderId);
+       let subFolder;
+       const subFolders = mainFolder.getFoldersByName(yearMonth);
+       if (subFolders.hasNext()) {
+         subFolder = subFolders.next();
+       } else {
+         subFolder = mainFolder.createFolder(yearMonth);
+       }
+
+       const fileId = fileUrl.match(/[-\w]{25,}/)[0];
+       const file = DriveApp.getFileById(fileId);
+       const safeDescription = descricao.replace(/[^a-zA-Z0-9]/g, '_');
+       const newFileName = `${conta}_${data}_${safeDescription}.pdf`;
+       file.setName(newFileName);
+
+       file.moveTo(subFolder);
+
+       const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+       const lastRow = sheet.getLastRow();
+       sheet.getRange(lastRow, sheet.getLastColumn()).setValue(file.getUrl());
+     }
+     ```
 4. Substitua os `INSIRA_ID_DA_PASTA_XXX` pelos IDs das pastas coletados.
 5. Salve com o nome "MoverRecibos".
 6. Crie um gatilho:
@@ -169,7 +288,7 @@ Este projeto cria um sistema para upload de recibos em PDF usando **Google Forms
 2. Verifique o Drive:
    - **Básica**: Abra "Recibos de Despesas" > "344 - Almoço, Café e Lanches".
    - **Alternativa**: Abra "Recibos de Despesas" > "344 - Almoço, Café e Lanches" > "2025-04".
-   - Confirme que o PDF está lá (com nome original ou renomeado, conforme o script).
+   - Confirme que o PDF está lá (com nome original ou renomeado).
 3. Verifique a planilha:
    - Veja se a nova linha tem o link do PDF na coluna "Link do Arquivo".
 
@@ -198,7 +317,7 @@ Este projeto cria um sistema para upload de recibos em PDF usando **Google Forms
 - Validar o conteúdo dos PDFs.
 
 ## Licença
-MIT License (veja o arquivo LICENSE).
+Este projeto está licenciado sob a MIT License. Veja o arquivo [LICENSE](LICENSE) para detalhes.
 
 ## Contato
 Abra uma issue para dúvidas.
