@@ -1,43 +1,49 @@
-4. Anote os IDs das pastas:
-- Clique com o botão direito em cada pasta > "Compartilhar" > "Copiar link".
-- O ID está no link: `https://drive.google.com/drive/folders/ID_DA_PASTA`.
-- Exemplo de anotação:
-  ```
-  344 - Almoço, Café e Lanches: ID_DA_PASTA_344
-  284 - Comissão Vendedores: ID_DA_PASTA_284
-  ...
-  ```
+function onFormSubmit(e) {
+  const responses = e.namedValues;
+  const conta = responses['Conta de Despesa'][0];
+  const data = responses['Data da Despesa'][0];
+  const descricao = responses['Descrição (Opcional)'][0] || '';
+  const fileUrl = responses['Recibo (PDF)'][0];
 
-**Alternativa**: Use o script abaixo no Google Apps Script para criar as pastas e obter os IDs:
-```javascript
-function createFolders() {
-  const mainFolder = DriveApp.createFolder('Recibos de Despesas');
-  const accounts = [
-    '344 - Almoço, Café e Lanches',
-    '284 - Comissão Vendedores',
-    '285 - Comissões Operador de Caixa',
-    '199 - Cursos e Treinamentos',
-    '347 - Decoração e Ornamentação Loja',
-    '385 - Despesas Diversas',
-    '203 - Estagiários e Aprendizes',
-    '370 - Exame Médico Admissional/Demissional',
-    '189 - Férias',
-    '158 - Fretes',
-    '110 - Manutenção de Máquinas e Equipamentos',
-    '156 - Manutenção e Reparos Predial',
-    '118 - Materiais de Expediente',
-    '105 - Materiais de Limpeza',
-    '312 - Material de Informática',
-    '351 - Móveis, Utensílios e Bens',
-    '192 - Multa Rescisória',
-    '191 - Rescisões Contratuais',
-    '357 - Sacolas',
-    '324 - Salário Operadores de Caixa',
-    '195 - Vales-Transporte',
-    '129 - Viagens'
-  ];
-  accounts.forEach(account => {
-    const subFolder = mainFolder.createFolder(account);
-    Logger.log(`${account}: ${subFolder.getId()}`);
-  });
+  // Mapear contas para IDs de pastas no Drive
+  const folderIds = {
+    '344 - Almoço, Café e Lanches': 'INSIRA_ID_DA_PASTA_344',
+    '284 - Comissão Vendedores': 'INSIRA_ID_DA_PASTA_284',
+    '285 - Comissões Operador de Caixa': 'INSIRA_ID_DA_PASTA_285',
+    '199 - Cursos e Treinamentos': 'INSIRA_ID_DA_PASTA_199',
+    '347 - Decoração e Ornamentação Loja': 'INSIRA_ID_DA_PASTA_347',
+    '385 - Despesas Diversas': 'INSIRA_ID_DA_PASTA_385',
+    '203 - Estagiários e Aprendizes': 'INSIRA_ID_DA_PASTA_203',
+    '370 - Exame Médico Admissional/Demissional': 'INSIRA_ID_DA_PASTA_370',
+    '189 - Férias': 'INSIRA_ID_DA_PASTA_189',
+    '158 - Fretes': 'INSIRA_ID_DA_PASTA_158',
+    '110 - Manutenção de Máquinas e Equipamentos': 'INSIRA_ID_DA_PASTA_110',
+    '156 - Manutenção e Reparos Predial': 'INSIRA_ID_DA_PASTA_156',
+    '118 - Materiais de Expediente': 'INSIRA_ID_DA_PASTA_118',
+    '105 - Materiais de Limpeza': 'INSIRA_ID_DA_PASTA_105',
+    '312 - Material de Informática': 'INSIRA_ID_DA_PASTA_312',
+    '351 - Móveis, Utensílios e Bens': 'INSIRA_ID_DA_PASTA_351',
+    '192 - Multa Rescisória': 'INSIRA_ID_DA_PASTA_192',
+    '191 - Rescisões Contratuais': 'INSIRA_ID_DA_PASTA_191',
+    '357 - Sacolas': 'INSIRA_ID_DA_PASTA_357',
+    '324 - Salário Operadores de Caixa': 'INSIRA_ID_DA_PASTA_324',
+    '195 - Vales-Transporte': 'INSIRA_ID_DA_PASTA_195',
+    '129 - Viagens': 'INSIRA_ID_DA_PASTA_129'
+  };
+
+  const folderId = folderIds[conta];
+  if (!folderId) {
+    Logger.log('Conta não encontrada: ' + conta);
+    return;
+  }
+
+  const fileId = fileUrl.match(/[-\w]{25,}/)[0];
+  const file = DriveApp.getFileById(fileId);
+  const folder = DriveApp.getFolderById(folderId);
+
+  file.moveTo(folder);
+
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const lastRow = sheet.getLastRow();
+  sheet.getRange(lastRow, sheet.getLastColumn()).setValue(file.getUrl());
 }
